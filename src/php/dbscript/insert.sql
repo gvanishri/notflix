@@ -1,0 +1,3 @@
+INSERT INTO `useracct` VALUES (1,'USR00001','admin','','QWRtaW4x','admin@gmail.com','','2021-03-21','2021-03-20','admin'),(2,'USR00002','user2','','VXNlcjI=','user2@gmail.com','','2021-03-24','2021/03/23','user'),(3,'USR00003','user3','','VXNlcjM=','user3@gmail.com','','2021-03-28','2021-03-27','user'),(10,'USR00004','test','','VGVzdDE=','test@gmail.com','','2021-04-27','2022-04-27','user');
+
+INSERT INTO `videotrack` VALUES (1,'TRCK00001','Track 1 Title','Track 1 - Title - Description test','src/php/videosrc/SRC-001.mp4','2021-01-30');

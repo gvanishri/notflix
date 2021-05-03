@@ -1,0 +1,141 @@
+
+body {
+font-family:verdana,Helvetica,sans-serif;color:black;
+font-size:12px;
+}
+
+table, th, td {
+width:100%;
+border: 0px solid black;
+border-collapse:collapse;
+//padding:5px;
+}
+
+.circle {
+  float:left;
+  height:30px;
+  width:30px;
+  //background-color:#e6f5ff;
+  border-radius:50%;
+  padding:4px;
+text-align:center;
+//vertical-align:middle;
+  font-size:20px;
+ display: block;
+}
+
+.clsMnuCnt {
+position:absolute;
+display:none;
+padding-left:10px;
+padding-top:10px;
+padding-bottom:10px;
+min-width:140px;
+//background-color:#e6f5ff;
+border-radius:5px;
+border: 1px solid black;
+margin-top: 10px;
+z-index: 1;
+}
+
+.clsMnuCnt:after {
+  content: "";
+  position:absolute;
+ 
+  width:20px;
+  height:20px;
+  transform:rotate(-45deg);
+  //background:#e6f5ff;
+  background:inherit;
+  border: 1px solid black;
+  z-index:-1;
+  border-left: 0px solid transparent;
+  border-bottom: 0px solid transparent;
+  top:-11px;
+  left:calc(20% - 10px);
+}
+
+.clsMnuCnt button {
+display:block;
+z-index: 1;
+}
+
+.clsMnuCnt button:hover {
+background-color: #ddd;
+}
+
+.imgNavCls {
+font-size:28px;
+position:absolute;
+padding: 4px 8px;
+top:40%;
+z-index:1;
+border-radius:50%;
+//background-color:#e6f5ff;
+}
+
+#lnkPrev:hover, #lnkNext:hover {
+//background-color:#ddd;
+opacity: 0.5;
+color: black;
+cursor:pointer;
+}
+
+iframe {
+margin-left: auto;   /* Automatic margin from left */ 
+margin-right: auto;
+}
+
+button {
+padding:5px;
+outline:none;
+border:0px;
+background-color:transparent;
+}
+
+button:hover, a:hover, button:active, a:active {
+border-bottom:2px solid black;
+cursor: pointer;
+//background-color:#e6f5ff;
+opacity:0.5;
+}
+
+#mnuLogin:hover, #mnuLogin:active, #mnuTrack:hover, #mnuTrack:active, #mnuAdmin:hover, #mnuAdmin:active {
+//background-color:#ddd;
+opacity:0.8;
+}
+
+img:hover, img:active {
+cursor:pointer;
+}
+
+#mnuLogin,#mnuTrack,#mnuAdmin {
+background-color:#e6f5ff;
+opacity:0.5;
+padding:2px;
+width:40px;
+height:40px;
+}
+
+#mnuLogin {
+border-radius:50%;
+}
+
+textarea {
+outline:none;
+border:none;
+border-radius:5px;
+//background-color:#e6f5ff; 
+opacity:0.5;
+}
+
+input[type=text],[type=password] {
+outline:none;
+border:none;
+border-radius:5px;
+width:300px;
+height:40px;
+//background-color:#e6f5ff; 
+opacity:0.5;
+}
+

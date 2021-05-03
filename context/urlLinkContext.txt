@@ -1,0 +1,27 @@
+
+//frameLogin - frame login after post - display welcome frame info
+var frameLogin = "";
+frameLogin = "frmAdminFrame|src/php/welcome.php|param1~usrMsg,param2~mnuOpt";
+
+var frameAdmin = "";
+//frameAdmin = "frmAdminFrame|src/php/phpDataCntxt.php|param1~name";
+frameAdmin = "frmAdminFrame|src/php/datacontext.php|param1~name";
+
+var frameTrackList = "";
+frameTrackList = "frmAdminFrame|src/php/tracklist.php|param1~usrInfo";
+
+/*
+var instaLnk = "";
+//instaLnk = "https://www.instagram.com/p/CI4ohu6jxrh/?igshid=1w7y8e9du43kb";
+instaLnk = "https://www.instagram.com/jewel_1130/";
+
+var facebkLnk = "";
+facebkLnk = "https://www.instagram.com/jewel_1130/";
+
+var frameStock = "";
+frameStock = "frmStockFrame|php-srcFiles/phpStockList.php|param1~category,param2~currency";
+
+var frameUploadURL = "";
+frameUploadURL = "php-srcFiles/upload-imgFile.php";
+*/
+
