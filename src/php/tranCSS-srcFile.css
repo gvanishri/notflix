@@ -45,7 +45,7 @@ input[type=text],[type=password] {
 width:230px;height:30px;outline:none;border:0px solid;border-radius:5px;background-color:transparent;
 }
 
-button, #btnSave, #acctSave, #btnChkUsr {
+button, #btnSave, #acctSave {
 color:black;
 padding:5px;
 outline:none;
@@ -53,7 +53,7 @@ border:0px;
 background-color:transparent;
 }
 
-button:hover, button:active, #btnSave:hover, #btnSave:active, #acctSave:hover, #acctSave:active,  #btnChkUsr:active,  #btnChkUsr:hover {
+button:hover, button:active, #btnSave:hover, #btnSave:active, #acctSave:hover, #acctSave:active {
 /*background-color: #e6f5ff;*/
 opacity: 0.8;
 border-bottom : 2px solid black;

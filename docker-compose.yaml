@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+   web:
+     build: .
+     ports:
+       - "8081:80"
+     links:
+       - db
+   db:
+    image: mysql:5.7
+    volumes:
+      - ./notflixdbscript.sql:/docker-entrypoint-initdb.d/notflixdbscript.sql
+      - ./insert.sql:/docker-entrypoint-initdb.d/insert.sql
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: dcDK1Kt;:7`KUx!e
+      MYSQL_DATABASE: notflix
+volumes:
+   db_data:

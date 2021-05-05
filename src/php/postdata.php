@@ -1,4 +1,3 @@
-
 <html>
 <script>
 //alert(sessionStorage.clickcount);
@@ -10,9 +9,11 @@
 include 'connsrvr.php';
 $mnuInfo = "";
 
-if(isset($_POST["btnChkUsr"])) {
-  echo "testing check user exists" ."<br><br>";
-} else {
+$mnuInfo = $_POST['lblMnuVal'];
+$usrVal = "";
+
+//echo "testing " .$mnuInfo ."<br>";
+
 /*
 function fetchEntityMaxVal($srvrConn,$txtVal) {
 //$tempArr = "";
@@ -35,7 +36,7 @@ switch ($txtVal) {
        $dbArr = explode($GLOBALS['dlmtr2'], $GLOBALS['auditDB']);
        break;
   default:
-    echo "Select a valid DB table" .$txtVal;
+        echo "Select a valid DB table" .$txtVal;
 }
 
 $dbX = "";
@@ -522,40 +523,66 @@ funcEntityInsertQuery($srvrConn,$stmtSQL);
 //echo "<br><br>";
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+function funcCheckValidUser($srvrConn) {
+    $usrName = $_POST['UserName'];    
 
-$srvrConn = connMySQL($servername,$username,$password,$schemaname);
+    $tsql = "SELECT UserName FROM useracct WHERE UserName = '" .$usrName ."'";
 
-if(empty($_FILES['fileObj'])){
-/*
-  //echo "<br><br>";
-//echo "hello";
-  //echo "<br><br>";
-*/
+    $result = fetchEntityResultSet($srvrConn,$tsql);
 
-//skip
-} else {
-
-try {
-  funcBindVideoFileUpload($srvrConn);
-  } catch (RuntimeException $e) {
-      echo $e->getMessage();
-      exit();
-  }
+    if (mysqli_num_rows($result) > 0) {
+        while($row = mysqli_fetch_assoc($result)) {
+            //$usrVal = $row['UserName'];
+            $usrVal = "NA";
+        }
+    } else {
+      $usrVal = $usrName;
+    }
+    return $usrVal;
 }
 
-funcBindInsertStmt($srvrConn);
 
-mysqli_close($srvrConn);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    //echo "testing " .$mnuInfo ."<br>";
+    
+    $srvrConn = connMySQL($servername,$username,$password,$schemaname);
+    if ($mnuInfo == "chkusr") {
+        //echo "testing register form submission <br>";
+        $usrVal = funcCheckValidUser($srvrConn);
+        //echo $usrVal ."<br><br>";
+    } else {
+    
+        if(empty($_FILES['fileObj'])){
+            
+            //echo "<br><br>";
+            //echo "hello";
+            //echo "<br><br>";            
 
+            //skip
+        } else {
+            try {
+                funcBindVideoFileUpload($srvrConn);
+            } catch (RuntimeException $e) {
+                echo $e->getMessage();
+                exit();
+            }
+        }
+
+        funcBindInsertStmt($srvrConn);
+    }
+    mysqli_close($srvrConn);    
 } // end if 
 
 //echo $mnuInfo;
 //echo "<br><br>";
-}
+
 ?>
 
 <script>
+var urlFile = "";
+var mnuVal = '<?php echo $mnuInfo ?>';
+//alert(mnuVal);
+
 //alert(sessionStorage.clickcount);
  if (sessionStorage.clickcount) {
       sessionStorage.clickcount = 0;
@@ -569,26 +596,32 @@ mysqli_close($srvrConn);
 //var urlPath = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port;
 var urlPath = sessionStorage.siteDomainName;
 //document.write(urlPath + "<br><br>");
-//var urlFile = "php-srcFiles/phpDataCntxt.php?name=" + '<?php echo $mnuInfo ?>';
 
 var tempX = parent.document.getElementById("lblUsrName");
 var usrName = tempX.innerHTML;
 var tempX = parent.document.getElementById("lblUsrPwd");
 var usrPwd = tempX.value;
 
-var mnuVal = '<?php echo $mnuInfo ?>';
-//alert(mnuVal);
 if (mnuVal == 'usracct' ) {
-var urlFile = "src/php/validateLogin.php?txtUsr=" + usrName + "&txtPwd=" + usrPwd + "&txtPage=" + mnuVal;
-} else if (mnuVal == 'usrchgpwd' || mnuVal == 'usrreg') {
-if (mnuVal == 'usrchgpwd') {
-msgVal = "msg|Password changes sucessfully, Try to login with new password|no" 
+    urlFile = "src/php/validateLogin.php?txtUsr=" + usrName + "&txtPwd=" + usrPwd + "&txtPage=" + mnuVal;
+} else if (mnuVal == 'usrchgpwd' || mnuVal == 'regusr') {
+    if (mnuVal == 'usrchgpwd') {
+        msgVal = "msg|Password changes sucessfully, Try to login with new password|no" 
+    } else {
+        msgVal = "msg|New member registration sucessful, Try to login|no" 
+    }
+    urlFile = "src/php/welcome.php?usrMsg=" + msgVal + "&mnuOpt=login";
+} else if (mnuVal == "chkusr") {
+    var usrVal = '<?php echo $usrVal ?>';
+    //alert(usrVal);
+    if (usrVal == "NA") {
+      urlFile = "src/php/register.php?txtRegMnu=" + mnuVal + "&txtUsrVal=" + usrVal;
+    } else {
+      mnuVal = "regusr";
+      urlFile = "src/php/register.php?txtRegMnu=" + mnuVal + "&txtUsrVal=" + usrVal;
+    }
 } else {
-msgVal = "msg|New member registration sucessful, Try to login|no" 
-}
-var urlFile = "src/php/welcome.php?usrMsg=" + msgVal + "&mnuOpt=login";
-} else {
-var urlFile = "src/php/datacontext.php?name=" + mnuVal;
+    urlFile = "src/php/datacontext.php?name=" + mnuVal;
 }
 //document.write(urlFile + "<br><br>");
 //var hrefVal = urlPath + "/" + urlFile;

@@ -18,7 +18,7 @@ try {
     //or die("<b>Error:</b> Problem on Image Insert<br/>" . mysqli_error($conn));
     $srvrConn = connMySQL($servername,$username,$password,$schemaname);
     
-    $stmtSQL = "SELECT * FROM videoblob"; //WHERE TrackID = 'test-001'";
+    $stmtSQL = "SELECT *, TO_BASE64(VideoBlobSrc) AS BLOBDATA FROM videoblob"; //WHERE TrackID = 'test-001'";
     
     $result = fetchEntityResultSet($srvrConn,$stmtSQL);
     
@@ -36,8 +36,10 @@ try {
 
             if(strpos($row['VideoBlobType'], "image") !== false) {
                 echo "<img src =data:'" .$row["VideoBlobType"] .";base64," .base64_encode($row['VideoBlobSrc']) ."></img>";
+                //echo "<img src =data:'" .$row["VideoBlobType"] .";base64," .$row['BLOBDATA'] ."></img>";
+                //echo "<img src=" .$row['BLOBDATA'] ."></img>";
             } else if(strpos($row["VideoBlobType"], "video") !== false) {
-
+                /*
                 $t = microtime(true);
                 $micro = sprintf("%06d",($t - floor($t)) * 1000000);
                 $d = new DateTime( date('Y-m-d H:i:s.'.$micro, $t) );
@@ -57,9 +59,13 @@ try {
                 //file_put_contents($fileName,file_get_contents($_FILES['fileblob']['tmp_name']));                
                 
                 file_put_contents($fileName,$row['VideoBlobSrc']);
+                */
+
                 echo "<video width='320' height='240' controls>";
-                echo "<source src=" .$fileName .">";
-                //echo "<source src=" .base64_encode($row['VideoBlobSrc']) .">";
+                //echo "<source src =data:'" .$row["VideoBlobType"] .";base64,"  .">";
+                echo "<source src=" .base64_encode($row['VideoBlobSrc']) ." type=" .$row["VideoBlobType"] .">";
+                //echo "<source src=" .$fileName .">";
+                //echo "<source src=" .$row['BLOBDATA'] .">";
                 echo "</video>";
             }
             

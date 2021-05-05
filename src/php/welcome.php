@@ -69,7 +69,7 @@ echo "<p><input type='password' id='txtPwd' name='txtPwd' placeholder='password'
 
 echo "<p><input type='submit' id='btnLogin' name='btnLogin' value='LOGIN'/></p>";
 
-echo "<p><a id='lnkLogin' href='register.php'> Do you have an account? Sign-up </a></p>";
+echo "<p><a id='lnkLogin' href='register.php?txtRegMnu=chkusr&txtUsrVal=new'> Do you have an account? Sign-up </a></p>";
 
 echo "</form>";
 } // end func

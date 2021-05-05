@@ -16,6 +16,19 @@ border: 1px solid black;
 <?php
 include 'connsrvr.php';
 
+$phpRegMnu = $_GET['txtRegMnu'];
+$phpUsrVal = $_GET['txtUsrVal'];
+/*
+echo $phpRegMnu;
+echo "<br><br>";
+
+echo $phpUsrVal;
+echo "<br><br>";
+*/
+$maxVal = "";
+$currDBMaxVal = "";
+$auditDBMaxVal = "";
+
 $auditArr = "";
 $auditArr = explode($dlmtr2,$auditDB);
 
@@ -61,28 +74,32 @@ echo "<br>";
 echo $keyPrefix;
 echo "<br>";
 */
+if ($phpRegMnu == "regusr") {
 
-$conn = connMySQL($servername,$username,$password,$schemaname);
+	$conn = connMySQL($servername,$username,$password,$schemaname);
 
-//echo "<br><br>";
-$tsql1 = "SELECT COALESCE(MAX(" .$autoGenKeyCol ."),0) as " .$autoGenKeyCol ." FROM " .$dbName;
-//echo $tsql1;
-$maxVal = fetchEntityMAXIDQuery($conn,$tsql1,$autoGenKeyCol);
-//autogenkeycol and prefix concat
-$currDBMaxVal = generateMAXID($keyPrefix,$maxVal,"yes","NA");
-//echo "MAX - Code - " .$dbName .":" .$currDBMaxVal;
+	//echo "<br><br>";
+	$tsql1 = "SELECT COALESCE(MAX(" .$autoGenKeyCol ."),0) as " .$autoGenKeyCol ." FROM " .$dbName;
+	//echo $tsql1;
+	$maxVal = fetchEntityMAXIDQuery($conn,$tsql1,$autoGenKeyCol);
+	//autogenkeycol and prefix concat
+	$currDBMaxVal = generateMAXID($keyPrefix,$maxVal,"yes","NA");
+	//echo "MAX - Code - " .$dbName .":" .$currDBMaxVal;
 
-//echo "<br><br>";
+	//echo "<br><br>";
 
-//echo $auditArr[0] .$auditArr[1];
-$tsql2 = "Select COALESCE(MAX(" .$auditArr[1] ."),0) as " .$auditArr[1] ." from " .$auditArr[0];
-//echo $tsql2;
-$maxVal = fetchEntityMAXIDQuery($conn,$tsql2,$auditArr[1]);
-//autogenkeycol and prefix concat
-$auditDBMaxVal = generateMAXID($auditArr[3],$maxVal,"yes","NA");
-//echo "MAX - Code - AuditLog :" .$auditDBMaxVal;
+	//echo $auditArr[0] .$auditArr[1];
+	$tsql2 = "Select COALESCE(MAX(" .$auditArr[1] ."),0) as " .$auditArr[1] ." from " .$auditArr[0];
+	//echo $tsql2;
+	$maxVal = fetchEntityMAXIDQuery($conn,$tsql2,$auditArr[1]);
+	//autogenkeycol and prefix concat
+	$auditDBMaxVal = generateMAXID($auditArr[3],$maxVal,"yes","NA");
+	//echo "MAX - Code - AuditLog :" .$auditDBMaxVal;
 
-mysqli_close($conn);
+	mysqli_close($conn);
+} else {
+	//skip
+} // if 
 
 ?>
 
@@ -91,21 +108,40 @@ mysqli_close($conn);
 </div>
 
 <script>
-var maxVal = '<?php echo $currDBMaxVal ?>';
-//alert(maxVal);
-var logID = '<?php echo $auditDBMaxVal ?>';
+
 //alert(logID);
-var mnuVal = "usrreg";
-var tmpArr1 = '<?php echo $tmpArr[0] ?>';
-var tmpArr2 = '<?php echo $tmpArr[1] ?>';
+//var mnuVal = "usrreg";
+var mnuVal = '<?php echo $phpRegMnu ?>';
+var usrVal = '<?php echo $phpUsrVal ?>';
 
-var dbArr = tmpArr1.split("|");
-var colInfo = tmpArr2.split("|");
-var dbX = dbArr[1];
+var maxVal = "";
+var logID = "";
 
-bindRegisterFrmCtrls(mnuVal,maxVal,logID);
+var tmpArr1 = "";
+var tmpArr2 = "";
 
-function bindRegisterFrmCtrls(mnuVal,usrMaxID,logMaxID) {
+var dbX = "";
+
+var dbArr = "";
+var colInfo = "";
+
+if (mnuVal == "regusr") {
+	maxVal = '<?php echo $currDBMaxVal ?>';
+	logID = '<?php echo $auditDBMaxVal ?>';
+	//alert(maxVal);	
+
+	tmpArr1 = '<?php echo $tmpArr[0] ?>';
+	tmpArr2 = '<?php echo $tmpArr[1] ?>';
+
+	dbArr = tmpArr1.split("|");
+	colInfo = tmpArr2.split("|");
+
+	dbX = dbArr[1];
+}
+
+bindRegisterFrmCtrls(mnuVal,usrVal,maxVal,logID);
+
+function bindRegisterFrmCtrls(mnuVal,usrVal,usrMaxID,logMaxID) {
 //alert(tmpArr2);
 
     divX = document.getElementById("regDiv");
@@ -118,8 +154,8 @@ function bindRegisterFrmCtrls(mnuVal,usrMaxID,logMaxID) {
     }
 
     frmX = document.createElement("form");
-    frmX.setAttribute("id","frmAcct");
-    frmX.setAttribute("name","frmAcct");
+    frmX.setAttribute("id","frmReg");
+    frmX.setAttribute("name","frmReg");
     frmX.setAttribute("style","width:100%;padding:10px;text-align:left;");
     frmX.setAttribute("method","POST");
     //frmX.setAttribute("style","background:pink;");
@@ -135,95 +171,88 @@ function bindRegisterFrmCtrls(mnuVal,usrMaxID,logMaxID) {
 	elmntX.innerHTML = "Register Member";
 	tblX.appendChild(elmntX);
 
-        for(i=0;i<colInfo.length;i++) {
-	    colArr = colInfo[i].split("~");
+	if (mnuVal=="chkusr") {
+		rowX = document.createElement("tr");
+		rowX.setAttribute("style","width:100%;");
 
-	    rowX = document.createElement("tr");
-	    if (colArr[1] == "UserAcctID" || colArr[1] == "RegisterDate" || colArr[1] == "ExpiryDate" || colArr[1] == "UserAdmin") {
-	        rowX.setAttribute("style","display:none;");
-		//rowX.setAttribute("style","width:100%;padding:5px;");
-	    } else {			
-            rowX.setAttribute("style","width:100%;padding:5px;");
-	    }
+		colX = document.createElement("td");
+		colX.setAttribute("style","padding:5px;");
+		colX.setAttribute("colspan","2");
 
-	    colX = document.createElement("td");
+		elmntX = document.createElement("label");
+		elmntX.setAttribute("id","paraX");
+		if (usrVal == "NA") {
+			elmntX.setAttribute("style","padding:5px;font-size:16px;color:red;float:right;");	
+			elmntX.innerHTML = "User name already exits, try again!";
+		} else {
+			elmntX.innerHTML = "";
+		}	
+		colX.appendChild(elmntX);
+		rowX.appendChild(colX);
+		tblX.appendChild(rowX);
+
+		rowX = document.createElement("tr");
+		rowX.setAttribute("style","width:100%;");
+
+		colX = document.createElement("td");
+    	colX.setAttribute("style","padding:5px;width:120px;");	
+
+		elmntX = document.createElement("label");
+		elmntX.innerHTML = "UserName";
+
+		colX.appendChild(elmntX);
+		rowX.appendChild(colX);
+
+		colX = document.createElement("td");
+    	colX.setAttribute("style","padding:5px;width:120px;");
+
+		elmntX = document.createElement("input");
+		elmntX.setAttribute("id","UserName");
+		elmntX.setAttribute("name","UserName");
+		elmntX.setAttribute("type","text");
+		elmntX.setAttribute("style","background:#e6f5ff;");
+		elmntX.setAttribute("value","");
+
+		colX.appendChild(elmntX);
+		rowX.appendChild(colX);
+
+		colX = document.createElement("td");
         colX.setAttribute("style","padding:5px;width:120px;");
 
-	    elmntX = document.createElement("label");
-	    elmntX.innerHTML = colArr[0];
+		elmntY = document.createElement("img");
+		elmntY.setAttribute("id","btnChkUsr");		
+		elmntY.setAttribute("src","chk-nook-icn.png");
+		elmntY.setAttribute("alt","usrnook");
+		elmntY.setAttribute("style","width:30px;height:30px;")
+		colX.appendChild(elmntY);
+		rowX.appendChild(colX);	
 
-	    colX.appendChild(elmntX);
-	    rowX.appendChild(colX);
+		tblX.appendChild(rowX);
 
-	    colX = document.createElement("td");
-        colX.setAttribute("style","padding:5px;");
+	} else if (mnuVal == "regusr"){
 
-	    elmntX = document.createElement("label");
-	    elmntX.innerHTML = "&nbsp;&nbsp";
+        for(i=0;i<colInfo.length;i++) {
+	    	colArr = colInfo[i].split("~");
 
-	    colX.appendChild(elmntX);
-	    rowX.appendChild(colX);
+	    	rowX = document.createElement("tr");
 
-	    colX = document.createElement("td");
-        colX.setAttribute("style","padding:5px;");
-
-	    elmntX = document.createElement("input");
-	    elmntX.setAttribute("id",colArr[1]);
-
-	    if (colArr[1] == "UserPwd" || colArr[1] == "UserAdmin") {
-            elmntX.setAttribute("type","password");
-        } else {
-            elmntX.setAttribute("type","text");
-	    }
-	    //elmntX.setAttribute("style","background:#e6f5ff;");
-		if (colArr[1] == "UserName") {	
-			elmntX.setAttribute("style","background:#e6f5ff;");
-			elmntX.disabled = false;
-		} else {
-			elmntX.setAttribute("style","background:#C0C0C0;");
-			elmntX.disabled = true;
-		}
-
-	    if (colArr[1] == "UserAcctID" || colArr[1] == "RegisterDate" || colArr[1] == "ExpiryDate" || colArr[1] == "UserAdmin") {
-            if (colArr[3] == "NA") {
-		    elmntX.value = maxVal;
-			} else {
-		    	elmntX.value = colArr[3];
-            }
-        } else {		
-			elmntX.value = "";
-	    }
-
-	    colX.appendChild(elmntX);
-	    rowX.appendChild(colX);
-        tblX.appendChild(rowX);
-		
-		if (colArr[1] == "UserName") {			
-			elmntY = document.createElement("button");
-			elmntY.setAttribute("type","submit");
-			elmntY.setAttribute("name","btnChkUsr");
-			elmntY.setAttribute("id","btnChkUsr");
-			//elmntY.setAttribute("value","Check");			
-			//elmntY.setAttribute("onclick","chkNameAvailable()");
-			elmntX.setAttribute("onclick","callFrmSubmit('" + btnChkUsr.id + "')");
-			colX.appendChild(elmntY);	
-		} 		
-
-	    if (colArr[1] == "UserPwd") {
-        	rowX = document.createElement("tr");
-			rowX.setAttribute("style","width:100%;padding:5px;");
+	    	if (colArr[1] == "UserAcctID" || colArr[1] == "RegisterDate" || colArr[1] == "ExpiryDate" || colArr[1] == "UserAdmin") {
+	        	rowX.setAttribute("style","display:none;");
+	    	} else {			
+            	rowX.setAttribute("style","width:100%;padding:5px;");
+	    	}
 
 	    	colX = document.createElement("td");
-            colX.setAttribute("style","padding:5px;width:120px;");
+        	colX.setAttribute("style","padding:5px;width:120px;");
 
 	    	elmntX = document.createElement("label");
-	    	elmntX.innerHTML = "Confirm Password";
+	    	elmntX.innerHTML = colArr[0];
 
 	    	colX.appendChild(elmntX);
 	    	rowX.appendChild(colX);
 
 	    	colX = document.createElement("td");
-            colX.setAttribute("style","padding:5px;");
+        	colX.setAttribute("style","padding:5px;");
 
 	    	elmntX = document.createElement("label");
 	    	elmntX.innerHTML = "&nbsp;&nbsp";
@@ -231,74 +260,136 @@ function bindRegisterFrmCtrls(mnuVal,usrMaxID,logMaxID) {
 	    	colX.appendChild(elmntX);
 	    	rowX.appendChild(colX);
 
-	        colX = document.createElement("td");
-	        colX.setAttribute("style","padding:5px;");
+	    	colX = document.createElement("td");
+        	colX.setAttribute("style","padding:5px;");
 
-			elmntX = document.createElement("input");
-			elmntX.setAttribute("id","txtNewPwd");
-            elmntX.setAttribute("type","password");
-	        //elmntX.setAttribute("style","background:#e6f5ff;");
-			elmntX.setAttribute("style","background:#C0C0C0;");
-			elmntX.disabled = true;
+	    	elmntX = document.createElement("input");
+	    	elmntX.setAttribute("id",colArr[1]);
 
+	    	if (colArr[1] == "UserPwd" || colArr[1] == "UserAdmin") {
+            	elmntX.setAttribute("type","password");
+        	} else {
+            	elmntX.setAttribute("type","text");
+	    	}
+	    	elmntX.setAttribute("style","background:#e6f5ff;");
+
+			if (colArr[1] == "UserName") {
+				elmntX.value = usrVal;
+				elmntX.setAttribute("style","background:#C0C0C0;");
+				elmntX.setAttribute("readonly","readonly");
+			} else if (colArr[1] == "UserAcctID" || colArr[1] == "RegisterDate" || colArr[1] == "ExpiryDate" || colArr[1] == "UserAdmin") {
+            	if (colArr[3] == "NA") {
+		    		elmntX.value = maxVal;
+				} else {
+		    		elmntX.value = colArr[3];
+            	}
+        	} else {		
+				elmntX.value = "";
+	    	}
 	    	colX.appendChild(elmntX);
 			rowX.appendChild(colX);
+        	tblX.appendChild(rowX);						
+		
+			if (colArr[1] == "UserName") {
+				colX = document.createElement("td");
+        		colX.setAttribute("style","padding:5px;width:120px;");
 
-	        tblX.appendChild(rowX);
-	    }
-	} // for loop
+				elmntY = document.createElement("img");
+				elmntY.setAttribute("id","btnChkUsr");		
+				elmntY.setAttribute("src","chk-ok-icn.png");
+				elmntY.setAttribute("alt","usrok");
+				elmntY.setAttribute("style","width:30px;height:30px;")
+				colX.appendChild(elmntY);
+				rowX.appendChild(colX);			
+			} else if (colArr[1] == "UserPwd") {
+        		rowX = document.createElement("tr");
+				rowX.setAttribute("style","width:100%;padding:5px;");
+
+	    		colX = document.createElement("td");
+            	colX.setAttribute("style","padding:5px;width:120px;");
+
+	    		elmntX = document.createElement("label");
+	    		elmntX.innerHTML = "Confirm Password";
+
+	    		colX.appendChild(elmntX);
+	    		rowX.appendChild(colX);
+
+	    		colX = document.createElement("td");
+            	colX.setAttribute("style","padding:5px;");
+
+	    		elmntX = document.createElement("label");
+	    		elmntX.innerHTML = "&nbsp;&nbsp";
+
+	    		colX.appendChild(elmntX);
+	    		rowX.appendChild(colX);
+
+	        	colX = document.createElement("td");
+	        	colX.setAttribute("style","padding:5px;");
+
+				elmntX = document.createElement("input");
+				elmntX.setAttribute("id","txtNewPwd");
+            	elmntX.setAttribute("type","password");
+	        	elmntX.setAttribute("style","background:#e6f5ff;");				
+
+	    		colX.appendChild(elmntX);
+				rowX.appendChild(colX);
+
+	        	tblX.appendChild(rowX);
+	    	}
+		} // for loop
+	
+    	rowX = document.createElement("tr");
+		//rowX.setAttribute("style","width:100%;padding:5px;");
+		rowX.setAttribute("style","display:none;");
+
+    	colX = document.createElement("td");
+    	colX.setAttribute("style","padding:5px;");
+
+		elmntX = document.createElement("input");
+		elmntX.setAttribute("type","text");
+		elmntX.setAttribute("name","idVal[]");
+		elmntX.setAttribute("readonly","readonly");
+		elmntX.setAttribute("value","NA");
+		colX.appendChild(elmntX);
+		rowX.appendChild(colX);
+
+		colX = document.createElement("td");
+    	colX.setAttribute("style","padding:5px;");
+
+		elmntX = document.createElement("input");
+		elmntX.setAttribute("type","text");
+		elmntX.setAttribute("name","keyVal[]");
+		elmntX.setAttribute("readonly","readonly");
+		elmntX.setAttribute("value","NA");
+		colX.appendChild(elmntX);
+		rowX.appendChild(colX);
+
+		colX = document.createElement("td");
+    	colX.setAttribute("style","padding:5px;");
+
+		elmntX = document.createElement("input");
+		elmntX.setAttribute("type","text");
+		elmntX.setAttribute("name","dbVal[]");
+		elmntX.setAttribute("readonly","readonly");
+		elmntX.setAttribute("value","NA");
+		colX.appendChild(elmntX);
+		rowX.appendChild(colX);
+
+		colX = document.createElement("td");
+    	colX.setAttribute("style","padding:5px;");
+
+		elmntX = document.createElement("input");
+		elmntX.setAttribute("type","text");
+		elmntX.setAttribute("name","updateVal[]");
+		elmntX.setAttribute("readonly","readonly");
+		elmntX.setAttribute("value","NA");
+		colX.appendChild(elmntX);
+
+		rowX.appendChild(colX);
+		tblX.appendChild(rowX);
+	} // phpRegMnu
 
     rowX = document.createElement("tr");
-	//rowX.setAttribute("style","width:100%;padding:5px;");
-	rowX.setAttribute("style","display:none;");
-
-    colX = document.createElement("td");
-    colX.setAttribute("style","padding:5px;");
-
-	elmntX = document.createElement("input");
-	elmntX.setAttribute("type","text");
-	elmntX.setAttribute("name","idVal[]");
-	elmntX.setAttribute("readonly","readonly");
-	elmntX.setAttribute("value","NA");
-	colX.appendChild(elmntX);
-	rowX.appendChild(colX);
-
-	colX = document.createElement("td");
-    colX.setAttribute("style","padding:5px;");
-
-	elmntX = document.createElement("input");
-	elmntX.setAttribute("type","text");
-	elmntX.setAttribute("name","keyVal[]");
-	elmntX.setAttribute("readonly","readonly");
-	elmntX.setAttribute("value","NA");
-	colX.appendChild(elmntX);
-	rowX.appendChild(colX);
-
-	colX = document.createElement("td");
-    colX.setAttribute("style","padding:5px;");
-
-	elmntX = document.createElement("input");
-	elmntX.setAttribute("type","text");
-	elmntX.setAttribute("name","dbVal[]");
-	elmntX.setAttribute("readonly","readonly");
-	elmntX.setAttribute("value","NA");
-	colX.appendChild(elmntX);
-	rowX.appendChild(colX);
-
-	colX = document.createElement("td");
-    colX.setAttribute("style","padding:5px;");
-
-	elmntX = document.createElement("input");
-	elmntX.setAttribute("type","text");
-	elmntX.setAttribute("name","updateVal[]");
-	elmntX.setAttribute("readonly","readonly");
-	elmntX.setAttribute("value","NA");
-	colX.appendChild(elmntX);
-
-	rowX.appendChild(colX);
-	tblX.appendChild(rowX);
-
-        rowX = document.createElement("tr");
 	rowX.setAttribute("style","width:100%;padding:5px;");
 
 	colX = "";
@@ -308,6 +399,8 @@ function bindRegisterFrmCtrls(mnuVal,usrMaxID,logMaxID) {
 	elmntX = document.createElement("input");
 	elmntX.setAttribute("type","hidden");
 	elmntX.setAttribute("name","lblMnuVal");
+	elmntX.setAttribute("id","lblMnuVal");
+	//elmntX.setAttribute("readonly","readonly");
 	elmntX.setAttribute("value",mnuVal);
 	colX.appendChild(elmntX);
 	rowX.appendChild(colX);
@@ -319,10 +412,15 @@ function bindRegisterFrmCtrls(mnuVal,usrMaxID,logMaxID) {
 	elmntX = document.createElement("button");
 	elmntX.setAttribute("type","submit");
 	elmntX.setAttribute("id","btnReg");
-    elmntX.setAttribute("style","float:right;");
-	elmntX.setAttribute("onclick","callFrmSubmit('" + btnReg.id + "')");  
-    elmntX.value = "Register";
-	elmntX.innerHTML = "Register";
+	//elmntX.setAttribute("onclick","checkRegFrm('" + usrMaxID + "','" + logMaxID + "')")
+	if (mnuVal == "chkusr") {
+		elmntX.setAttribute("value","Check");
+		elmntX.innerHTML = "Check user name available";	
+	}else if (mnuVal == "regusr") {
+		elmntX.setAttribute("style","float:right;");
+		elmntX.setAttribute("value","Register");
+		elmntX.innerHTML = "Register";	
+	}
 
     colX.appendChild(elmntX);
 	rowX.appendChild(colX);
@@ -330,126 +428,115 @@ function bindRegisterFrmCtrls(mnuVal,usrMaxID,logMaxID) {
     tblX.appendChild(rowX);
 
 	frmX.appendChild(tblX);
-	//frmX.setAttribute("onsubmit","return checkRegFrm('" + usrMaxID + "','" + logMaxID + "')");
+	frmX.setAttribute("onsubmit","return checkRegFrm('" + usrMaxID + "','" + logMaxID + "')");
     
 	divX.appendChild(frmX);
 } // end func
 
-function callFrmSubmit(strVal) {
-	if (strVal == "btnReg") {
-
-	} else if (strVal == "btnChkUsr" ) {
-
-	}
-}
-
-function checkNameExists(){
-var blnValidFrm = true;
-var valX = "";
-
-	validate: {
-		//validate user name
-		var txtName = document.getElementById("UserName");
-    	if(chkValidName(txtName,true,30,"User name") == false) {
-       		blnValidFrm = false;
-       		break validate; 
-    	}
-	}	
-}
 function checkRegFrm(usrMaxID,logMaxID) {
 var blnValidFrm = true;
 var valX = "";
 
 validate: {
-    //validate user name
-    var txtName = document.getElementById("UserName");
-    if(chkValidName(txtName,true,30,"User name") == false) {
-       blnValidFrm = false;
-       break validate; 
-    }
+	if (mnuVal == "chkusr") {
+		var txtName = document.getElementById("UserName");
+    	if(chkValidName(txtName,true,30,"User name") == false) {
+       		blnValidFrm = false;
+       		break validate; 
+			//exit();
+    	}
+	} else {
+    	//validate user name
+    	var txtName = document.getElementById("UserName");
+    	if(chkValidName(txtName,true,30,"User name") == false) {
+       		blnValidFrm = false;
+       		break validate; 
+    	}
     
-    //validate last name
-    var txtLName = document.getElementById("LastName");
-    if(chkValidName(txtLName,false,30,"Last name") == false) {
-       blnValidFrm = false;
-       break validate; 
-    }
+    	//validate last name
+    	var txtLName = document.getElementById("LastName");
+    	if(chkValidName(txtLName,false,30,"Last name") == false) {
+       		blnValidFrm = false;
+       		break validate; 
+    	}
 
-    //validate password
-    var txtPwdX = document.getElementById("UserPwd");
-    if (chkValidPassword(txtPwdX,true) == false) {
-        blnValidFrm = false;
-        break validate;
-    }
+    	//validate password
+    	var txtPwdX = document.getElementById("UserPwd");
+    	if (chkValidPassword(txtPwdX,true) == false) {
+        	blnValidFrm = false;
+        	break validate;
+    	}
 
-    //validate password
-    var txtPwdY = document.getElementById("txtNewPwd");
-    if (chkValidPassword(txtPwdY,true) == false) {
-        blnValidFrm = false;
-        break validate;
-    }
+    	//validate password
+    	var txtPwdY = document.getElementById("txtNewPwd");
+    	if (chkValidPassword(txtPwdY,true) == false) {
+        	blnValidFrm = false;
+        	break validate;
+    	}
 
-    if (txtPwdX.value == txtPwdY.value) {
-	//skip
-    } else {
-       alert("Confirm password and New password should be same");
-       txtPwdY.focus();
-       blnValidFrm = false;
-       break validate;
-    }
+    	if (txtPwdX.value == txtPwdY.value) {
+			//skip
+    	} else {
+       		alert("Confirm password and New password should be same");
+       		txtPwdY.focus();
+       		blnValidFrm = false;
+       		break validate;
+    	}
 
-    //validate email length and is email valid
-    var txtEmail = document.getElementById("UserEmail");
-    if (chkCharLength(txtEmail,40,"User email") == false) {
-        blnValidFrm = false;
-        break validate;
-    }
+    	//validate email length and is email valid
+    	var txtEmail = document.getElementById("UserEmail");
+    	if (chkCharLength(txtEmail,40,"User email") == false) {
+        	blnValidFrm = false;
+        	break validate;
+    	}
 
-    if(chkValidEmail(txtEmail,true) == false) {
-       blnValidFrm = false;
-       break validate;
-    }
+    	if(chkValidEmail(txtEmail,true) == false) {
+       		blnValidFrm = false;
+       		break validate;
+    	}
 
-    //validate phone
-    var txtPhone = document.getElementById("UserPhone");
-    if(chkValidPhone(txtPhone,false) == false) {
-       blnValidFrm = false;
-       break validate;
-    }
+    	//validate phone
+    	var txtPhone = document.getElementById("UserPhone");
+    	if(chkValidPhone(txtPhone,false) == false) {
+       		blnValidFrm = false;
+       		break validate;
+    	}
+	}
 }
 
 if (blnValidFrm == true) {
-    var tmpX = "";
+	if (mnuVal == "chkusr") {
+		//skip
+	} else {
+		var tblX = document.getElementById("tblReg");
 
-	var tblX = document.getElementById("tblReg");
+		var cnt = tblX.rows.length;
+		var rowData = "";
+		var tmpX = "";
 
-	var cnt = tblX.rows.length;
-	var rowData = "";
-	var tmpX = "";
+		for (i=0;i<cnt-2;i++) {
+	    	rowData = tblX.rows[i].cells;
+	     	//alert(rowData.length);
 
-	for (i=0;i<cnt-2;i++) {
-	     rowData = tblX.rows[i].cells;
-	     //alert(rowData.length);
-
-	     if (rowData[2].firstChild.id == "txtNewPwd") {
-             //skip
-             } else {
-
-                 if (rowData[2].firstChild.value == "") {
-                     tmpX = "NA";
-                 } else {
-                     tmpX = rowData[2].firstChild.value;
-                 }
-                 if (valX == "") {
-                     //alert(rowData[2].firstChild);
-                     valX = rowData[2].firstChild.id + "|NA|" + tmpX;
-                 } else {
-                     valX = valX + "||" + rowData[2].firstChild.id + "|NA|" + tmpX;
-         	 }
-             }// for loop
-	}// for loop
-    //alert(valX);
-    bindAuditLogData(valX,usrMaxID,logMaxID);
+	     	if (rowData[2].firstChild.id == "txtNewPwd") {
+            	//skip
+            } else {
+                if (rowData[2].firstChild.value == "") {
+                    tmpX = "NA";
+                } else {
+                    tmpX = rowData[2].firstChild.value;
+                }
+                if (valX == "") {
+                    //alert(rowData[2].firstChild);
+                    valX = rowData[2].firstChild.id + "|NA|" + tmpX;
+                } else {
+                    valX = valX + "||" + rowData[2].firstChild.id + "|NA|" + tmpX;
+         		}
+        	}// if
+		}// for loop
+    	//alert(valX);
+    	bindAuditLogData(valX,usrMaxID,logMaxID);
+	}
 }
 
 return  blnValidFrm;

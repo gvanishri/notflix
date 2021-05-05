@@ -1,3 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+.accordion {
+  text-decoration: none;
+  color: black;
+  cursor: pointer;
+  padding: 10px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size:14px;
+}
+
+.active, .accordion:hover {
+  background-color:#e6f5ff;
+}
+
+/*
+.accordion:after {
+    //content: '\002B';
+    color:black;
+    font-size:20px;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.active:after {
+    content: "\2212";
+}
+*/
+</style>
+</head>
+
+<body>
+
 <?php 
 include 'connsrvr.php';
 
@@ -38,76 +78,56 @@ echo $srchCol3;
 echo "<br><br>";
 */
 
-
 function fetchTrackTranData($srvrConn,$srchUsrID) {
+	$trantrckArr = "";
+	$trantrckArr = explode($GLOBALS['dlmtr1'],$GLOBALS['tranTrackCrdn']);
 
-$valX = "";
-$currIndx = 0;
-$txtTranArr = [];
+	$dbX = $trantrckArr[0];
+	$dbColArr = explode($GLOBALS['dlmtr2'],$trantrckArr[1]);
 
-$trantrckArr = explode($GLOBALS['dlmtr1'],$GLOBALS['tranTrackCrdn']);
+	$tsql = "SELECT TranID, TrackID ,InteractionPoint As TrackCurrTime FROM " .$GLOBALS['tmpdbName'] ." WHERE " .$GLOBALS['srchCol1'] ;
+	$tsql = $tsql ." IN (SELECT max(TranID) FROM ".$GLOBALS['tmpdbName'] ." where " .$GLOBALS['srchCol2'] ." = '" .$srchUsrID ."' GROUP BY UserAcctID, TrackID)";
+	//echo $tsql ."<br><br>";
 
-$dbX = $trantrckArr[0];
-$dbColArr = explode($GLOBALS['dlmtr2'],$trantrckArr[1]);
+	$resultSet = fetchEntityResultSet($srvrConn,$tsql);
 
-$tsql = "SELECT TranID, TrackID ,InteractionPoint As TrackCurrTime FROM " .$GLOBALS['tmpdbName'] ." WHERE " .$GLOBALS['srchCol1'] ;
-$tsql = $tsql ." IN (SELECT max(TranID) FROM ".$GLOBALS['tmpdbName'] ." where " .$GLOBALS['srchCol2'] ." = '" .$srchUsrID ."' GROUP BY UserAcctID, TrackID)";
-//echo $tsql ."<br><br>";
+	//printf("Server version: %s\n", mysqli_get_server_info($conn));
 
-$resultSet = fetchEntityResultSet($srvrConn,$tsql);
+	if (mysqli_num_rows($resultSet) > 0) {
+		//echo "Query fetched ". mysqli_num_rows($resultSet) ." rows <br>";
 
-//printf("Server version: %s\n", mysqli_get_server_info($conn));
+		while($row = mysqli_fetch_assoc($resultSet)) {
 
-if (mysqli_num_rows($resultSet) > 0) {
-	//echo "Query fetched ". mysqli_num_rows($resultSet) ." rows <br>";
+			$cnt = count($dbColArr);
 
-while($row = mysqli_fetch_assoc($resultSet)) {
+			//TranID,TranTrackID,TranCurrTime
+			$tsql = "";
+			$tsql = "INSERT INTO" ." " .$dbX ." (";
 
-//$txtTranArr[$currIndx] = "tranID~" .$row['TranID'] ."|" ."tranTrckID~" .$row['TrackID'] ."|" ."txtTrckCurrTime~" .$row['TrackCurrTime'];
+			for($i=0;$i<$cnt;$i++) {
+				if ($i<($cnt-1)) {
+					$tsql = $tsql .$dbColArr[$i] .",";
+				} else {
+					$tsql = $tsql .$dbColArr[$i] .")";
+				}	 
+			} // for loop
 
-//echo $txtTranArr[$currIndx] ."<br<br>";
+			$tsql = $tsql ." VALUES (";
+			$tsql = $tsql ."'" .$GLOBALS['txtUsrID'] ."','" .$row['TranID']	."','" .$row['TrackID'] ."','" .$row['TrackCurrTime'] ."')";
 
-//$currIndx = $currIndx + 1;
+			$stmtSQL = $tsql;
 
-$cnt = count($dbColArr);
+			//echo $stmtSQL;
+			//echo "<br><br>";
 
-//TranID,TranTrackID,TranCurrTime
-$tsql = "";
-$tsql = "INSERT INTO" ." " .$dbX ." (";
+			funcEntityInsertQuery($srvrConn,$stmtSQL);
 
-for($i=0;$i<$cnt;$i++) {
-	if ($i<($cnt-1)) {
-		$tsql = $tsql .$dbColArr[$i] .",";
+		} //end while
 	} else {
-		$tsql = $tsql .$dbColArr[$i] .")";
-	}	 
-}
+		//echo "Query fetched 0 rows <br>";
+	}
 
-$tsql = $tsql ." VALUES (";
-$tsql = $tsql ."'" .$GLOBALS['txtUsrID'] ."','" .$row['TranID']	."','" .$row['TrackID'] ."','" .$row['TrackCurrTime'] ."')";
-
-$stmtSQL = $tsql;
-
-//echo $stmtSQL;
-//echo "<br><br>";
-
-funcEntityInsertQuery($srvrConn,$stmtSQL);
-
-} //end while
-
-/*
-//serialize the array and store in a file
-$serialized = serialize($txtTranArr);
-
-//Save the serialized array to a text file.
-file_put_contents($GLOBALS['tranlogfile'], $serialized);
-*/
-
-} else {
-//echo "Query fetched 0 rows <br>";
-}
-
-mysqli_free_result($resultSet);
+	mysqli_free_result($resultSet);
 } // end func
 
 //$currTranID = "";
@@ -144,110 +164,132 @@ echo "<br>";
 
 $colArr = $tempArr[1];
 
-function funcFetchTrackData($srvrConn) {
-$rowIndx = 0;
-$colIndx = 0;
-$nval = 0;
+function funcFetchTrackData($srvrConn,$usrID) {
+	$rowIndx = 0;
+	$colIndx = 0;
+	$nval = 0;
 
-//$tsql = "Select * from " .$GLOBALS['dbName'];
-$tsql = "Select * from " .$GLOBALS['dbName'];
-//echo "<br><br>" .$tsql ."<br><br>";
+	//$tsql = "Select * from " .$GLOBALS['dbName'];
+	//$tsql = "Select * from " .$GLOBALS['dbName'];
+	$tsql = "SELECT vid.VideoID AS VideoID, vid.TrackID AS TrackID, vid.TrackTitle AS TrackTitle, ";
+	$tsql = $tsql . "vid.TrackDesc AS TrackDesc, vid.TrackSrc AS TrackSrc, vid.TrackUploadDate AS TrackUploadDate, ";
+	$tsql = $tsql . "IFNull(fav.FavID,'NA') AS FavID ";
+	$tsql = $tsql . "FROM videotrack vid LEFT JOIN favourites fav ON (vid.TrackID = fav.TrackID) ";
+	$tsql = $tsql . "AND (fav.UserAcctID IS NULL OR fav.UserAcctId = '" .$usrID  ."') ";
+	//echo "<br><br>" .$tsql ."<br><br>";
 
-$result = fetchEntityResultSet($srvrConn,$tsql);
+	$result = fetchEntityResultSet($srvrConn,$tsql);
 
-echo "<table id='frmTrackList'>";
+	//echo "<table id='frmTrackList' style='width:100%;vertical-align:center;'>";
+	echo "<table id='frmTrackList'>";
 
-echo "<caption id='TrckCapID'>" .$GLOBALS['tblCaption'] ."</caption>";
+	echo "<caption id='TrckCapID'>" .$GLOBALS['tblCaption'] ."</caption>";
 
-if (mysqli_num_rows($result) > 0) {
-	//echo "Query fetched ". mysqli_num_rows($result) ." rows <br>";
+	if (mysqli_num_rows($result) > 0) {
+		//echo "Query fetched ". mysqli_num_rows($result) ." rows <br>";
 
-while($row = mysqli_fetch_assoc($result)) {
-$nval = $nval+1;
+		while($row = mysqli_fetch_assoc($result)) {
+			$nval = $nval+1;
 
-//echo "<br><br>" .$nval ." - " .fmod($nval,3) ."<br><br>";
+			//echo "<br><br>" .$nval ." - " .fmod($nval,3) ."<br><br>";
 
-if ($nval == 1 || fmod($nval,4) == 0) {
-$rowIndx = ($rowIndx + 1);
-$rowName = $GLOBALS['dbName'] ."row" .$rowIndx;
-//echo $rowName;
-//style='float:left;vertical-align:top;margin-left:5%;text-align:center;'
-echo "<tr id=" .$rowName ." style='vertical-align:top;margin-left:5%;text-align:center;'>";
-} else if ($nval == 2) {
-//skip
-}
+			if ($nval == 1 || fmod($nval,4) == 0) {
+				$rowIndx = ($rowIndx + 1);
+				$rowName = $GLOBALS['dbName'] ."row" .$rowIndx;
+				//echo $rowName;
+				echo "<tr id=" .$rowName ." style='vertical-align:top;margin-left:5%;padding:10px;text-align:center;'>";
+			} else if ($nval == 2) {
+				//skip
+			}
 
-$colIndx = ($colIndx + 1);
+			$colIndx = ($colIndx + 1);
 
-$colName = "";
-$colName = $GLOBALS['dbName'] ."col" .$colIndx;
-//echo $colName;
-echo "<td id=" .$colName .">";
+			$colName = "";
+			$colName = $GLOBALS['dbName'] ."col" .$colIndx;
+			//echo $colName;
+			echo "<td id=" .$colName ." style='padding:10px;'>";
 
-$colName = "";
-$colName = $GLOBALS['dbName'] ."TrackSrc" .$colIndx;
-$cellInfo = $row['TrackSrc'];
-$trckSrc = siteURL() .$cellInfo;
+			$colName = "";
+			$colName = $GLOBALS['dbName'] ."TrackSrc" .$colIndx;
+			$cellInfo = $row['TrackSrc'];
+			$trckSrc = siteURL() .$cellInfo;
 
-//echo $trckSrc;
+			//echo $trckSrc;
 
-$nameVal = phpHandleSpace($row['TrackTitle']);
-//echo $nameVal;
-$nameVal = addslashes($nameVal);
-//echo $nameVal;
+			$nameVal = phpHandleSpace($row['TrackTitle']);
+			//echo $nameVal;
+			$nameVal = addslashes($nameVal);
+			//echo $nameVal;
 
-//echo "<br><br>" .$trckSrc ."<br><br>";
+			//echo "<br><br>" .$trckSrc ."<br><br>";
 
-//echo "<video id=" .$colName ." src=" .$trckSrc ." width='200px' height='200px' onclick=funcZoomImgOnclick('" .$trckSrc ."','" .$nameVal ."') muted></video>";
-echo "<video id=" .$colName ." src=" .$trckSrc ." width='200px' height='200px' muted></video>";
+			echo "<video id=" .$colName ." src=" .$trckSrc ." width='200px' height='200px' muted></video>";
 
-echo "<p> </p>";
+			echo "<p> </p>";
 
-$colName = "";
-$colName = $GLOBALS['dbName'] ."TrackTitle" .$colIndx;
+			$colName = "";
+			$colName = $GLOBALS['dbName'] ."TrackTitle" .$colIndx;
 
-$nameVal = $row['TrackTitle'];
-echo "<label id=" .$colName .">" .$nameVal ."</label>";
+			$nameVal = $row['TrackTitle'];
+			echo "<label id=" .$colName .">" .$nameVal ."</label>";
 
-echo "<p> </p>";
+			echo "<p> </p>";
 
-$colName = "";
-$colName = $GLOBALS['dbName'] ."TrackDesc" .$colIndx;
+			$colName = "";
+			$colName = $GLOBALS['dbName'] ."TrackDesc" .$colIndx;
 
-$nameVal = $row['TrackDesc'];
-echo "<label id=" .$colName .">" .$nameVal ."</label>";
+			$nameVal = $row['TrackDesc'];
+			echo "<label id=" .$colName .">" .$nameVal ."</label>";
 
-echo "<p> </p>";
+			echo "<p> </p>";
 
-$colName = "";
-$colName = "lnkPlay" .$colIndx;
+			$colName = "";
+			$colName = "lnkPlay" .$colIndx;
 
-$trckID = $row['TrackID'];
-$GLOBALS['txtTrackID'] = $trckID;
-$valX = preg_replace("| |","_",$row['TrackTitle']);
-$trckname = $valX;
+			$trckID = $row['TrackID'];
+			$GLOBALS['txtTrackID'] = $trckID;
+			$valX = preg_replace("| |","_",$row['TrackTitle']);
+			$trckname = $valX;
 
-//echo "<a id=" .$colName ." href=playtrack.php?trckid=" .$trckID ."&trcktitle=" .$trckname ."&trcksrc=" .$row['TrackSrc'] .">Click here to play video</a>";
+			//echo "<a id=" .$colName ." href=playtrack.php?trckid=" .$trckID ."&trcktitle=" .$trckname ."&trcksrc=" .$row['TrackSrc'] .">Click here to play video</a>";
 
-//$cntxtVal = "trckid=" .$trckID ."&trcktitle=" .$trckname ."&trcksrc=" .$row['TrackSrc'] ."&txtUsrID=" .$txtUsrID ."&txtUsrName=" .$txtUsrName";
+			//$cntxtVal = "trckid=" .$trckID ."&trcktitle=" .$trckname ."&trcksrc=" .$row['TrackSrc'] ."&txtUsrID=" .$txtUsrID ."&txtUsrName=" .$txtUsrName";
 
-$GLOBALS['cntxtVal'] = "trckid~" .$trckID ."|trcktitle~" .$trckname ."|trcksrc~" .$row['TrackSrc'] ."||";
-$GLOBALS['cntxtVal'] = $GLOBALS['cntxtVal'] ."txtUsrID~" .$GLOBALS['txtUsrID'] ."|txtUsrName~" .$GLOBALS['txtUsrName'];
+			$GLOBALS['cntxtVal'] = "trckid~" .$trckID ."|trcktitle~" .$trckname ."|trcksrc~" .$row['TrackSrc'] ."||";
+			$GLOBALS['cntxtVal'] = $GLOBALS['cntxtVal'] ."txtUsrID~" .$GLOBALS['txtUsrID'] ."|txtUsrName~" .$GLOBALS['txtUsrName'];
 
-//echo $GLOBALS['cntxtVal'] ."<br><br>";
+			//echo $GLOBALS['cntxtVal'] ."<br><br>";
 
-//echo "<a id=" .$colName ." href=playtrack.php?cntxtVal=" .$GLOBALS['cntxtVal'] ."&test=Hello" .">Click here to play video</a>";
-echo "<a id=" .$colName ." href=playtrack.php?cntxtVal=" .$GLOBALS['cntxtVal'] .">Click here to play video</a>";
+			//echo "<a id=" .$colName ." href=playtrack.php?cntxtVal=" .$GLOBALS['cntxtVal'] ."&test=Hello" .">Click here to play video</a>";
+			//echo "<a id=" .$colName ." href=playtrack.php?cntxtVal=" .$GLOBALS['cntxtVal'] ." style='padding:5px;font-size:14px;'>Click here to play video</a>";
+			echo "<a id=" .$colName ." href='#href' style='padding:5px;font-size:14px;' onclick=fetchPlayTrack('" .$colName ."','" .$GLOBALS['cntxtVal'] ."')>Click here to play video</a>";
 
-} //while row
+			echo "<p> </p>";
 
-} else {
-//echo "Query fetched 0 rows <br>";
-$GLOBALS['cntxtVal'] = "NA";
-} // if num of rows > 0
-mysqli_free_result($result);
+			//$favID = "NA";
+			$favID = $row['FavID'];
+			$favicn = "";
+			$favAction = "";
+			if ($favID == "NA") {
+				$favAction = "addfav";
+				$favicn = "&#43;";
+			} else {
+				$favAction = "rmfav";
+				$favicn = "&#10003;";
+			}
 
-echo "</table>";
+			$colName = "lnkFav" .$colIndx;;
+
+			echo "<a id=" .$colName ." class='accordion' onclick=updateFavList('" .$colName ."','" . $favAction ."','" .$GLOBALS['txtUsrID'] ."','" .$GLOBALS['txtUsrName'] ."','" .$trckID ."') > Watchlist <b style='font-size:20px'>&nbsp;" .$favicn ."</b></a>";
+		} //while row
+
+	} else {
+		//echo "Query fetched 0 rows <br>";
+		$GLOBALS['cntxtVal'] = "NA";
+	} // if num of rows > 0
+	mysqli_free_result($result);
+
+	echo "</table>";
 
 } // end func
 
@@ -255,9 +297,54 @@ $conn = connMySQL($servername,$username,$password,$schemaname);
 
 fetchTrackTranData($conn,$txtUsrID);
 
-funcFetchTrackData($conn);
+funcFetchTrackData($conn,$txtUsrID);
 
 mysqli_close($conn);
 
 //echo $GLOBALS['cntxtVal'] ."<br><br>";
 ?>
+
+<script>
+
+function fetchPlayTrack(strID,dataVal) {
+	//alert(strID);
+	var hrefVal = "playtrack.php?cntxtVal=" + dataVal;
+	tmpX = document.getElementById(strID);
+	if (tmpX == null || tmpX == undefined) {
+		//skip
+	} else {		
+		tmpX.href = hrefVal;
+	}
+}
+
+function updateFavList(strID,strAction,usrID,usrName,trckID) {
+	//alert(strID);
+	var hrefVal = "";
+	var strVal = "";
+	if (strAction == "addfav") {
+		strVal = "Append";
+	} else if (strAction == "rmfav") {
+		strVal = "Delete";
+	}
+	hrefVal = "posttrack.php?lnkaction=" + strVal + "&usrID=" + usrID + "&usrName=" + usrName + "&trckID=" + trckID;
+	tmpX = document.getElementById(strID);
+	if (tmpX == null || tmpX == undefined) {
+		//skip
+	} else {
+		tmpX.href = hrefVal;
+	}
+}
+/*
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+  });
+}
+*/
+</script>
+
+</body>
+</html>

@@ -13,7 +13,7 @@ CREATE TABLE `auditlog` (
 ) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `audittran` (
-  `TranID` varchar(45) NOT NULL,
+  `TranID` varchar(50) NOT NULL,
   `UserAcctID` varchar(12) NOT NULL,
   `UserName` varchar(32) NOT NULL,
   `TrackID` varchar(12) NOT NULL,

@@ -66,7 +66,7 @@ switch ($txtVal) {
        $tempArr = explode($dlmtr1, $trackAuditCrdn);
        break;
   default:
-    echo "Select a valid DB table";
+    echo "Select - Valid DB table to fetchdata - datacontext.php";
 }
 
 /*
