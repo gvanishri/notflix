@@ -1,5 +1,7 @@
+<!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body {
 font-size:12px;font-family:verdana,Helvetica,sans-serif;

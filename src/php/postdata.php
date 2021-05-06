@@ -1,8 +1,15 @@
+<!DOCTYPE html>
 <html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
 <script>
 //alert(sessionStorage.clickcount);
 //document.write(sessionStorage.clickcount + "<br><br>");
 </script>
+
+<body>
 
 <?php
 
@@ -631,4 +638,5 @@ var hrefVal = urlPath + urlFile;
 window.location.href = hrefVal;
 </script>
 
+</body>
 </html>

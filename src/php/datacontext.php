@@ -1,6 +1,8 @@
 
+<!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="tranCSS-srcFile.css">
 <script src="tranFrm-srcFile.js"></script>
 <script src="validateFrm.js"></script>
@@ -104,6 +106,46 @@ function exportData() {
     frm.submit();
 }
 
+function validateUsrNameExists(tblX,dbX,strName) {
+    var blnUsrExists = false;
+    var rowCnt = tblX.rows.length;
+    var colCnt = tblX.rows[1].cells.length;
+    var tmpI = "";
+    var rowData = "";
+    for (i=1;i<rowCnt;i++) {
+        /*
+        rowData = tblX.rows[i].cells;
+        var tagVal = rowData[0].childNodes[0].tagName.toLowerCase();
+
+        if  (tagVal == "label") {
+            valX = rowData[0].childNodes[0].innerHTML;
+        } else {
+            valX = rowData[0].childNodes[0].value;
+        }
+        alert(valX);
+        */
+        var strID = dbX + "UserName" + i;
+        tmpU = document.getElementById(strID);
+        if (tmpU == null || tmpU == undefined) {
+            //skip
+        } else {
+            var tagVal = tmpU.tagName.toLowerCase();
+
+            if  (tagVal == "label") {
+                valX = tmpU.innerHTML;
+            } else {
+                valX = tmpU.value;
+            }
+            //alert(valX);
+            if (valX == strName) {
+                blnUsrExists = true;
+                break;
+            }
+        }
+    }
+
+    return blnUsrExists;
+} // function
 
 function validateFrmData(dbX,strMode,tblX,indxVal) {
 validFrm = "yes";
@@ -117,14 +159,21 @@ editedFrm = "no";
             if (strMode == "Append") {
                 tempY = document.getElementById(dbX + "UserName");
 
-                if(chkValidName(tempY,true,30,"User name") == false) {
+                if (chkValidName(tempY,true,30,"User name") == false) {
                     validFrm = "no";
                     break validate; 
                 } else {
                     //skip
                 }
+                
+                if (validateUsrNameExists(tblX,dbX,tempY.value) == true) {
+                    alert("User name already exits, try again!");
+                    tempY.focus();
+                    validFrm = "no";
+                    break validate; 
+                }
 
-	        //validate password
+	            //validate password
     	        var txtPwdX = document.getElementById(dbX + "UserPwd");
     	        if (chkValidPassword(txtPwdX,true) == false) {
                     validFrm = "no";
@@ -145,7 +194,7 @@ editedFrm = "no";
                     txtPwdY.focus();
                     validFrm = "no";
                     break validate;
-	        }
+	            }
             }
 
             var strName = dbX + "LastName" + indxVal + "-oldval";

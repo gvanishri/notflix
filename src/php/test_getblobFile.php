@@ -2,7 +2,7 @@
 
 <body>
 <div id='blobfrm'>
-<form method="POST" action="testpostblob.php" enctype="multipart/form-data">
+<form method="POST" action="test_postblob.php" enctype="multipart/form-data">
 <input type='file' name='fileblob' id='fileblob' accept='*/*'> </input>
 <input type='submit' name='blobbtn' id='btnblob' value='Save'> </input>
 </form>
